@@ -1086,6 +1086,10 @@ class LabelAnnotator:
             text_x = text_background_xyxy[0] + self.text_padding
             text_y = text_background_xyxy[1] + self.text_padding + text_h
 
+            # Won't work if background is drawn, but is good for now
+            if text_y - text_h < 0:
+                text_y = text_background_xyxy[3] + self.text_padding + text_h
+
             if self.background:
                 cv2.rectangle(
                     img=scene,
