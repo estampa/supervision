@@ -27,6 +27,8 @@ class BoxAnnotator:
             default is 1
         text_padding (int): The padding around the text on the bounding box,
             default is 5
+        background (bool): If set to `True`, draws a background behind the text
+        draw_label (bool): If set to `True`, draws the label on the bounding box
 
     """
 
@@ -38,6 +40,8 @@ class BoxAnnotator:
         text_scale: float = 0.5,
         text_thickness: int = 1,
         text_padding: int = 10,
+        background: bool = True,
+        draw_label: bool = True,
     ):
         self.color: Union[Color, ColorPalette] = color
         self.thickness: int = thickness
@@ -45,6 +49,8 @@ class BoxAnnotator:
         self.text_scale: float = text_scale
         self.text_thickness: int = text_thickness
         self.text_padding: int = text_padding
+        self.background: bool = background
+        self.draw_label: bool = draw_label
 
     @scene_to_annotator_img_type
     def annotate(
@@ -135,21 +141,23 @@ class BoxAnnotator:
             text_background_x2 = x1 + 2 * self.text_padding + text_width
             text_background_y2 = y1
 
-            cv2.rectangle(
-                img=scene,
-                pt1=(text_background_x1, text_background_y1),
-                pt2=(text_background_x2, text_background_y2),
-                color=color.as_bgr(),
-                thickness=cv2.FILLED,
-            )
-            cv2.putText(
-                img=scene,
-                text=text,
-                org=(text_x, text_y),
-                fontFace=font,
-                fontScale=self.text_scale,
-                color=self.text_color.as_rgb(),
-                thickness=self.text_thickness,
-                lineType=cv2.LINE_AA,
-            )
+            if self.background:
+                cv2.rectangle(
+                    img=scene,
+                    pt1=(text_background_x1, text_background_y1),
+                    pt2=(text_background_x2, text_background_y2),
+                    color=color.as_bgr(),
+                    thickness=cv2.FILLED,
+                )
+            if self.draw_label:
+                cv2.putText(
+                    img=scene,
+                    text=text,
+                    org=(text_x, text_y),
+                    fontFace=font,
+                    fontScale=self.text_scale,
+                    color=self.text_color.as_rgb(),
+                    thickness=self.text_thickness,
+                    lineType=cv2.LINE_AA,
+                )
         return scene

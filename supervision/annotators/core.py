@@ -913,6 +913,8 @@ class LabelAnnotator:
         text_padding: int = 10,
         text_position: Position = Position.TOP_LEFT,
         color_lookup: ColorLookup = ColorLookup.CLASS,
+        background: bool = True,
+        shadow: bool = False,
     ):
         """
         Args:
@@ -926,6 +928,8 @@ class LabelAnnotator:
                 Possible values are defined in the `Position` enum.
             color_lookup (str): Strategy for mapping colors to annotations.
                 Options are `INDEX`, `CLASS`, `TRACK`.
+            background (bool): Whether to draw a background behind the text.
+            shadow (bool): Whether to draw a shadow behind the text.
         """
         self.color: Union[Color, ColorPalette] = color
         self.text_color: Color = text_color
@@ -934,6 +938,9 @@ class LabelAnnotator:
         self.text_padding: int = text_padding
         self.text_anchor: Position = text_position
         self.color_lookup: ColorLookup = color_lookup
+        self.background = background
+        self.shadow = shadow
+
 
     @staticmethod
     def resolve_text_background_xyxy(
@@ -1079,13 +1086,25 @@ class LabelAnnotator:
             text_x = text_background_xyxy[0] + self.text_padding
             text_y = text_background_xyxy[1] + self.text_padding + text_h
 
-            cv2.rectangle(
-                img=scene,
-                pt1=(text_background_xyxy[0], text_background_xyxy[1]),
-                pt2=(text_background_xyxy[2], text_background_xyxy[3]),
-                color=color.as_bgr(),
-                thickness=cv2.FILLED,
-            )
+            if self.background:
+                cv2.rectangle(
+                    img=scene,
+                    pt1=(text_background_xyxy[0], text_background_xyxy[1]),
+                    pt2=(text_background_xyxy[2], text_background_xyxy[3]),
+                    color=color.as_bgr(),
+                    thickness=cv2.FILLED,
+                )
+            if self.shadow:
+                cv2.putText(
+                    img=scene,
+                    text=text,
+                    org=(text_x+1, text_y+1),
+                    fontFace=font,
+                    fontScale=self.text_scale,
+                    color=Color.BLACK.as_rgb(),
+                    thickness=self.text_thickness,
+                    lineType=cv2.LINE_AA,
+                )
             cv2.putText(
                 img=scene,
                 text=text,
